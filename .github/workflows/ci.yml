@@ -1,0 +1,41 @@
+name: iOS Notes Automation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        env:
+          UDID: ${{ secrets.UDID }}
+          BUNDLE_ID: ${{ secrets.BUNDLE_ID }}
+        run: npm test
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results/
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots/
